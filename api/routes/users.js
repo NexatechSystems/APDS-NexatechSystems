@@ -1,7 +1,16 @@
+import express from "express";
+import bcrypt from "bcrypt";
+import ExpressBrute from "express-brute";
+import jwt from "jsonwebtoken";
+
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const saltRounds = 10;
+
+var store = new ExpressBrute.MemoryStore();
+var bruteforce =new ExpressBrute(store);
 
 // Mock database (Replace with actual DB connection)
 const users = [];
@@ -20,13 +29,16 @@ router.post('/register', async (req, res) => {
 });
 
 // Login Route
-router.post('/login', async (req, res) => {
+router.post('/login',bruteforce.prevent, async (req, res) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email);
     if (user && await bcrypt.compare(password, user.password)) {
+        const token = jwt.sign({email:req.body.email, password:req.body.password})
+
+
         res.status(200).send('Login Successful');
     } else {
-        res.status(400).send('Invalid Credentials');
+         return res.status(401).json({"Invalid Credentials"});
     }
 });
 

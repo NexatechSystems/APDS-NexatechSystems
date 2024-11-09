@@ -2,31 +2,19 @@ import React, { useState } from "react";
 import DOMPurify from 'dompurify';  // For XSS prevention
 
 export const Register = (props) => {
-    const [email, setEmail] = useState('');
-    const [pass, setPass] = useState('');
     const [name, setName] = useState('');
+    const [idNumber, setIdNumber] = useState('');
+    const [accountNumber, setAccountNumber] = useState('');
+    const [pass, setPass] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Simple RegEx pattern for email validation @mcebisi, here is the regex
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
-        if (!emailPattern.test(email)) 
-        {
-            alert('Please enter a valid email.');
-            return;
-        }
-
-        if (!passwordPattern.test(pass)) 
-        {
-            alert('Password must be at least 8 characters long and contain at least one number.');
-            return;
-        }
+        
+        // Prepend 'cust' to the account number
+        const fullAccountNumber = `cust${accountNumber}`;
 
         // Send the registration request
-        const response = await fetch('http://localhost:3000/api/users/register', 
+        const response = await fetch('https://localhost:3001/api/users/register', 
         {
             method: 'POST',
             headers: 
@@ -34,7 +22,7 @@ export const Register = (props) => {
                 'Content-Type': 'application/json',
             },
             credentials: 'include', // Ensure cookies are included in the request
-            body: JSON.stringify({ email, password: pass }),
+            body: JSON.stringify({ fullName: name, idNumber, accountNumber: fullAccountNumber, password: pass }),
         });
 
         const data = await response.text();
@@ -48,6 +36,35 @@ export const Register = (props) => {
             alert('Registration failed. Please try again.');
         }
         console.log(data);
+    };    
+
+    // Validate input patterns
+    const handleNameChange = (e) => {
+        const value = e.target.value;
+        if (/^[a-zA-Z\s]*$/.test(value)) { // Allow only letters and spaces
+            setName(value);
+        }
+    };
+
+    const handleIdNumberChange = (e) => {
+        const value = e.target.value;
+        if (/^\d{0,13}$/.test(value)) { // Allow only up to 13 digits
+            setIdNumber(value);
+        }
+    };
+
+    const handleAccountNumberChange = (e) => {
+        const value = e.target.value;
+        if (/^\d{0,4}$/.test(value)) { // Allow only up to 4 digits
+            setAccountNumber(value);
+        }
+    };
+
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        if (/^[A-Za-z\d]{0,16}$/.test(value)) { // Allows letters and numbers, up to 16 characters
+            setPass(value);
+        }
     };
 
     return (
@@ -57,24 +74,33 @@ export const Register = (props) => {
                 <label htmlFor="name">Full Name</label>
                 <input
                     value={DOMPurify.sanitize(name)} // Sanitize the input to prevent XSS
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={handleNameChange}
                     name="name"
                     id="name"
                     placeholder="John Doe"
                 />
-                <label htmlFor="email">Email</label>
+                <label htmlFor="idNumber">ID Number</label>
                 <input
-                    value={DOMPurify.sanitize(email)} // Sanitize the input to prevent XSS
-                    onChange={(e) => setEmail(e.target.value)}
-                    type="email"
-                    placeholder="yourEmail@gmail.com"
-                    id="email"
-                    name="email"
+                    value={idNumber} 
+                    onChange={handleIdNumberChange}
+                    type="text"
+                    placeholder="Your ID Number"
+                    id="idNumber"
+                    name="idNumber"
+                />
+                <label htmlFor="accountNumber">Account Number</label>
+                <input
+                    value={accountNumber} 
+                    onChange={handleAccountNumberChange}
+                    type="text"
+                    placeholder="Account Number (e.g 0000)"
+                    id="accountNumber"
+                    name="accountNumber"
                 />
                 <label htmlFor="password">Password</label>
                 <input
                     value={pass}
-                    onChange={(e) => setPass(e.target.value)}
+                    onChange={handlePasswordChange}
                     type="password"
                     placeholder="***********"
                     id="password"
@@ -88,6 +114,3 @@ export const Register = (props) => {
         </div>
     );
 };
-
-
-

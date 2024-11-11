@@ -49,8 +49,9 @@ app.use(function (err, req, res, next) {
 });
 
 // Load SSL credentials
-const privateKey = fs.readFileSync('C:/Users/hoque/payments-portal/api/server.key', 'utf8');
-const certificate = fs.readFileSync('C:/Users/hoque/payments-portal/api/server.cert', 'utf8');
+const privateKey = fs.readFileSync(path.join(__dirname, 'server.key'), 'utf8');
+const certificate = fs.readFileSync(path.join(__dirname, 'server.cert'), 'utf8');
+
 const credentials = { key: privateKey, cert: certificate };
 
 // Start HTTPS server

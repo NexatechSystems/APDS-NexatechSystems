@@ -18,10 +18,29 @@ export const Dashboard = (props) => {
     const handlePaymentSubmit = async (e) => {
         e.preventDefault();
 
+        if (swiftCode.length < 8 || swiftCode.length > 11) {
+            alert('SWIFT code must be between 8 and 11 characters.');
+            return;
+        }
+
+        if (cardNumber.length !== 16) {
+            alert('Card number must be exactly 16 digits.');
+            return;
+        }
+
+        if (cvv.length < 3 || cvv.length > 4) {
+            alert('CVV must be 3 or 4 digits.');
+            return;
+        }
+
         const paymentData = {
             amount,
             currency,
-            swiftCode
+            swiftCode,
+            cardHolder,
+            cardNumber,
+            expiryDate,
+            cvv,
         };
 
         try {
@@ -46,7 +65,7 @@ export const Dashboard = (props) => {
 
     const handleSwiftCodeChange = (e) => {
         const value = e.target.value;
-        if (/^[A-Za-z0-9]{8,11}$/.test(value)) { // SWIFT/BIC format (8-11 alphanumeric characters)
+        if (/^[A-Za-z0-9]*$/.test(value) && value.length <= 11) { // Allow incremental typing up to 11 characters
             setSwiftCode(value);
         }
     };
@@ -60,7 +79,7 @@ export const Dashboard = (props) => {
 
     const handleCardNumberChange = (e) => {
         const value = e.target.value;
-        if (/^\d{16}$/.test(value)) { // 16-digit card number
+        if (/^\d*$/.test(value) && value.length <= 16) { // Allow incremental typing up to 16 digits
             setCardNumber(value);
         }
     };
@@ -71,7 +90,7 @@ export const Dashboard = (props) => {
 
     const handleCvvChange = (e) => {
         const value = e.target.value;
-        if (/^\d{3,4}$/.test(value)) { // 3 or 4 digit CVV
+        if (/^\d*$/.test(value) && value.length <= 4) { // Allow incremental typing up to 4 digits
             setCvv(value);
         }
     };
